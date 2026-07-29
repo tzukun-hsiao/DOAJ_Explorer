@@ -48,6 +48,7 @@ df['SJR quartile'] = df['SJR quartile'].str.replace('Q', '')
 df['SJR quartile'] = df['SJR quartile'].astype(float).astype('Int64')
 df['Scopus quartile'] = df['Scopus quartile'].str.replace('Q', '')
 df['Scopus quartile'] = df['Scopus quartile'].astype(float).astype('Int64')
+df = df.sort_values(by='Scopus quartile', ascending=True)
 
 #st.write(df)
 
