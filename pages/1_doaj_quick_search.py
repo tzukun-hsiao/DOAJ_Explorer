@@ -36,6 +36,8 @@ To limit your search to journals without article processing charges (APCs), sele
 ### Viewing Results
 If matching journals are found, the results will appear below the search box.
 Click “View details” to expand the record and see more information.
+### Want to explore journals by subject area?
+Use the **Scopus Ranking Explorer** or **SCImago Ranking Explorer** from the left sidebar to browse journals by subject area and ranking quartile.
 ### Important Notes
 - Last updated: July 29, 2026
 - **APCs may change over time. Please check the journal’s website for the most up-to-date information.**
