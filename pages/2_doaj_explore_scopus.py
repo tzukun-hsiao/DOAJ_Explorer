@@ -1,0 +1,89 @@
+import streamlit as st
+import numpy as np
+import pandas as pd
+import requests
+import io
+from github import Github, Auth
+
+st.set_page_config(layout="wide")
+
+@st.cache_data
+def load_data(file_name):
+    auth = Auth.Token(st.secrets["GITHUB_TOKEN"])
+    g = Github(auth=auth)
+    repo = g.get_repo(st.secrets["DATA_REPO"])
+
+    file = repo.get_contents(f'DOAJ_Explorer/{file_name}')
+
+    response = requests.get(
+        file.download_url,
+        headers={"Authorization": f"Bearer {st.secrets['GITHUB_TOKEN']}"}
+    )
+    response.raise_for_status()
+
+    return pd.read_csv(io.BytesIO(response.content), sep='\t')
+
+df = load_data(file_name='doaj_journalcsv_20260628_rankings.tsv')
+
+md_txt = f"""
+### DOAJ Journals in Scopus Ranking: Subject Area Explorer
+This tool helps users explore DOAJ-indexed journals that are included in Scopus ranking.   
+Use the dropdown menu below to browse journals by subject area and by Scopus quartile ranking.
+- Last updated: July 29, 2026
+- **Article processing charges (APCs) may change over time. Please check the journal’s website for the most up-to-date information.**
+- If you find a journal that interests you and would like to check whether it is indexed in Web of Science, visit the [Web of Science Master Journal List](https://mjl.clarivate.com/home).
+"""
+st.markdown(md_txt)
+
+#st.write(df.columns.tolist())
+
+scopus = df.loc[~df['Scopus quartile'].isna()]
+scopus = scopus.sort_values(by=['lv1_asjc_code', 'lv2_asjc_code'], 
+                            ascending=[True, True])
+fields = scopus['lv1_asjc_name'].unique().tolist()
+#st.write(scopus['Percentile'].unique().tolist())
+
+option = st.selectbox(label=" ", placeholder='Select a Subject Area:', 
+                      options=fields, index=None, key='selection1')
+if option is not None:
+    sub_fields = scopus.loc[scopus['lv1_asjc_name']==option]['lv2_asjc_name'].unique().tolist()
+    for isub, sub_field in enumerate(sub_fields):
+        with st.expander(sub_field):
+            df_display = scopus.loc[df['lv2_asjc_name']==sub_field]
+            #st.table(df_display)
+            quartiles = df_display['Scopus quartile'].unique().tolist()
+            quartiles.sort()
+            for iq, quartile in enumerate(quartiles):
+                with st.expander(f"Scopus quartile: {quartile}"):
+                    #st.write(df_display)
+                    no_apc = st.checkbox('Only show journals with no APCs', 
+                                         key=f'no_apc_{isub}-{iq}')
+                    df_display2 = df_display.loc[df_display['Scopus quartile']==quartile]
+                    df_display2 = df_display2.sort_values(by=['APC', 'Publisher'], 
+                                                          ascending=[True, True])
+
+                    cols = ['Journal title', 'Scopus quartile', 'Publisher', 'APC', 'APC amount', 
+                            'Journal ISSN (print version)', 'Journal EISSN (online version)', 
+                            'Journal URL', 'URL in DOAJ']
+                    df_display2 = df_display2[cols]
+                    df_display2 = df_display2.rename(columns={
+                        'Scopus quartile': 'Quartile',
+                        'Journal ISSN (print version)': 'ISSN', 
+                        'Journal EISSN (online version)': 'E-ISSN',
+                        'URL in DOAJ': 'Journal DOAJ URL'})
+                    
+                    df_display2 = df_display2.set_index('Journal title')
+                    #st.markdown(f'no_apc: {no_apc}')
+                    if no_apc:
+                        df_display2 = df_display2.loc[df_display2['APC']=='No']
+
+                    if df_display2.shape[0] > 0:
+                        st.dataframe(
+                            df_display2, 
+                            width='stretch',
+                            column_config={
+                                "Journal title": st.column_config.TextColumn("Journal title", width='large')
+                                }
+                        )
+                    else:
+                        st.write('No journals in this quartile and subject area are free of APCs.')

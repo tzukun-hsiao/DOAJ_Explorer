@@ -1,0 +1,23 @@
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Pages
+pages/4_doaj_misc.py
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Vscode
+.vscode
+
+# macOS
+.DS_Store
+
+# folder and file
+secret_files/
+ipynb/
