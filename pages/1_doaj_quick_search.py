@@ -27,9 +27,9 @@ df = load_data(file_name='doaj_journalcsv_20260628_rankings.tsv')
 
 md_txt = """
 ## DOAJ Journal Quick Search 
-DOAJ Journal Quick Search helps you find open access journals and check available journal ranking information in one place. 
+DOAJ Journal Quick Search helps you find open access journals and check available journal ranking information in one place.     
 The tool searches journals indexed in the Directory of Open Access Journals (DOAJ) and provides basic information such as publisher, publication fees, average time from submission to publication, and links to the journal’s DOAJ page.
-When available, it also provides quartile rankings from Scopus CiteScore Ranking and the SCImago Journal Ranking.
+When available, it also provides quartile rankings from Scopus CiteScore Ranking and SCImago Journal Ranking.
 ### How to Search
 Enter a journal title or ISSN in the search box, then click the search button.  
 To limit your search to journals without article processing charges (APCs), select “Yes” for “Diamond OA only.”
@@ -104,9 +104,13 @@ with st.form("search_form"):
                     found_doaj_ids = found_doaj_ids.loc[found_doaj_ids['n_word_matched']==max_n_words]
                     found_doaj_ids = found_doaj_ids['URL in DOAJ'].tolist()
                     df_found = df.loc[df['URL in DOAJ'].isin(found_doaj_ids)]
-                    
-                    df_found_g = df_found.groupby('URL in DOAJ')
-                    for i, dfg in df_found_g:
+                    df_found = df_found.sort_values(by='Scopus quartile', ascending=True)
+
+                    df_found_urls = df_found['URL in DOAJ'].unique().tolist()
+                    #df_found_g = df_found.groupby('URL in DOAJ')
+                    #for i, dfg in df_found_g:
+                    for df_found_url in df_found_urls:
+                        dfg = df_found.loc[df_found['URL in DOAJ']==df_found_url]
                         #st.write(dfg)
                         #min_scimago_quartile = dfg['SJR quartile'].min()
                         #min_scopus_quartile = dfg['Scopus quartile'].min()
