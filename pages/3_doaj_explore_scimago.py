@@ -42,6 +42,7 @@ st.markdown(md_txt)
 
 scimago = df.loc[~df['SJR quartile'].isna()]
 fields = scimago['Top Category'].unique().tolist()
+fields.sort()
 #st.write(scopus['Percentile'].unique().tolist())
 
 option = st.selectbox(label=" ", placeholder='Select a Subject Area:', 
