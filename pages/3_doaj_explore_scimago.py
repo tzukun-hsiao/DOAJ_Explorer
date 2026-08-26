@@ -49,6 +49,7 @@ option = st.selectbox(label=" ", placeholder='Select a Subject Area:',
                       options=fields, index=None, key='selection1')
 if option is not None:
     sub_fields = scimago.loc[scimago['Top Category']==option]['Category'].unique().tolist()
+    sub_fields.sort()
     for isub, sub_field in enumerate(sub_fields):
         with st.expander(sub_field):
             df_display = scimago.loc[df['Category']==sub_field]
