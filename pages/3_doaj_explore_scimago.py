@@ -41,9 +41,12 @@ st.markdown(md_txt)
 #st.write(df.columns.tolist())
 
 scimago = df.loc[~df['SJR quartile'].isna()]
+scimago['SJR'] = scimago['SJR'].str.replace(',', '.')
+scimago['SJR'] = scimago['SJR'].astype(float)
 fields = scimago['Top Category'].unique().tolist()
 fields.sort()
 #st.write(scopus['Percentile'].unique().tolist())
+
 
 option = st.selectbox(label=" ", placeholder='Select a Subject Area:', 
                       options=fields, index=None, key='selection1')
@@ -53,7 +56,6 @@ if option is not None:
     for isub, sub_field in enumerate(sub_fields):
         with st.expander(sub_field):
             df_display = scimago.loc[df['Category']==sub_field]
-            #st.table(df_display)
             quartiles = df_display['SJR quartile'].unique().tolist()
             quartiles.sort()
             for iq, quartile in enumerate(quartiles):
@@ -62,8 +64,8 @@ if option is not None:
                     no_apc = st.checkbox('Only show journals with no APCs', 
                                          key=f'no_apc_{isub}-{iq}')
                     df_display2 = df_display.loc[df_display['SJR quartile']==quartile]
-                    df_display2 = df_display2.sort_values(by=['APC', 'Publisher'], 
-                                                          ascending=[True, True])
+                    df_display2 = df_display2.sort_values(by=['SJR', 'Publisher'], 
+                                                          ascending=[False, True])
 
                     cols = ['Journal title', 'SJR quartile', 'Publisher', 'APC', 'APC amount', 
                             'Journal ISSN (print version)', 'Journal EISSN (online version)', 
