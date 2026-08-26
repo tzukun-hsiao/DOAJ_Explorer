@@ -23,13 +23,16 @@ def load_data(file_name):
 
     return pd.read_csv(io.BytesIO(response.content), sep='\t')
 
-df = load_data(file_name='doaj_journalcsv_20260628_rankings.tsv')
+df = load_data(file_name='doaj_journalcsv_20260726_scimago_ranking.tsv')
+df = df.rename(columns={'Quartile': 'SJR quartile'})
+#st.write(df.columns.tolist())
+df = df.loc[~df['Top Category'].isna()]
 
 md_txt = f"""
 ### DOAJ Journals in SCImago Ranking: Subject Area Explorer
 This tool helps users explore DOAJ-indexed journals that are included in SCImago ranking.   
 Use the dropdown menu below to browse journals by subject area and by SCImago quartile ranking.
-- Last updated: July 29, 2026
+- Last updated: August 26, 2026
 - **Article processing charges (APCs) may change over time. Please check the journal’s website for the most up-to-date information.**
 - If you find a journal that interests you and would like to check whether it is indexed in Web of Science, visit the [Web of Science Master Journal List](https://mjl.clarivate.com/home).
 """
@@ -38,19 +41,16 @@ st.markdown(md_txt)
 #st.write(df.columns.tolist())
 
 scimago = df.loc[~df['SJR quartile'].isna()]
-scimago = scimago.loc[~scimago['lv1_asjc_code'].isna()]
-scimago = scimago.sort_values(by=['lv1_asjc_code', 'lv2_asjc_code'], 
-                              ascending=[True, True])
-fields = scimago['lv1_asjc_name'].unique().tolist()
+fields = scimago['Top Category'].unique().tolist()
 #st.write(scopus['Percentile'].unique().tolist())
 
 option = st.selectbox(label=" ", placeholder='Select a Subject Area:', 
                       options=fields, index=None, key='selection1')
 if option is not None:
-    sub_fields = scimago.loc[scimago['lv1_asjc_name']==option]['lv2_asjc_name'].unique().tolist()
+    sub_fields = scimago.loc[scimago['Top Category']==option]['Category'].unique().tolist()
     for isub, sub_field in enumerate(sub_fields):
         with st.expander(sub_field):
-            df_display = scimago.loc[df['lv2_asjc_name']==sub_field]
+            df_display = scimago.loc[df['Category']==sub_field]
             #st.table(df_display)
             quartiles = df_display['SJR quartile'].unique().tolist()
             quartiles.sort()

@@ -23,13 +23,13 @@ def load_data(file_name):
 
     return pd.read_csv(io.BytesIO(response.content), sep='\t')
 
-df = load_data(file_name='doaj_journalcsv_20260628_rankings.tsv')
+df = load_data(file_name='doaj_journalcsv_20260726_scimago_ranking.tsv')
 
 md_txt = """
 ## DOAJ Journal Quick Search 
 DOAJ Journal Quick Search helps you find open access journals and check available journal ranking information in one place.     
 The tool searches journals indexed in the Directory of Open Access Journals (DOAJ) and provides basic information such as publisher, publication fees, average time from submission to publication, and links to the journal’s DOAJ page.
-When available, it also provides quartile rankings from Scopus CiteScore Ranking and SCImago Journal Ranking.
+When available, it also provides quartile rankings from SCImago Journal Ranking.
 ### How to Search
 Enter a journal title or ISSN in the search box, then click the search button.  
 To limit your search to journals without article processing charges (APCs), select “Yes” for “Diamond OA only.”
@@ -37,19 +37,19 @@ To limit your search to journals without article processing charges (APCs), sele
 If matching journals are found, the results will appear below the search box.
 Click “View details” to expand the record and see more information.
 ### Want to explore journals by subject area?
-Use the **Scopus Ranking Explorer** or **SCImago Ranking Explorer** from the left sidebar to browse journals by subject area and ranking quartile.
+Use the **SCImago Ranking Explorer** from the left sidebar to browse journals by subject area and ranking quartile.
 ### Important Notes
-- Last updated: July 29, 2026
+- Last updated: August 26, 2026
 - **APCs may change over time. Please check the journal’s website for the most up-to-date information.**
 - If you find a journal that interests you and would like to check whether it is indexed in Web of Science, visit the [Web of Science Master Journal List](https://mjl.clarivate.com/home).
 """
 
 st.markdown(md_txt)
 
+df = df.rename(columns={'Quartile': 'SJR quartile'})
+
 df['SJR quartile'] = df['SJR quartile'].str.replace('Q', '')
 df['SJR quartile'] = df['SJR quartile'].astype(float).astype('Int64')
-df['Scopus quartile'] = df['Scopus quartile'].str.replace('Q', '')
-df['Scopus quartile'] = df['Scopus quartile'].astype(float).astype('Int64')
 
 #st.write(df)
 
@@ -106,18 +106,13 @@ with st.form("search_form"):
                     found_doaj_ids = found_doaj_ids.loc[found_doaj_ids['n_word_matched']==max_n_words]
                     found_doaj_ids = found_doaj_ids['URL in DOAJ'].tolist()
                     df_found = df.loc[df['URL in DOAJ'].isin(found_doaj_ids)]
-                    df_found = df_found.sort_values(by='Scopus quartile', ascending=True)
+                    df_found = df_found.sort_values(by='SJR quartile', ascending=True)
 
                     df_found_urls = df_found['URL in DOAJ'].unique().tolist()
                     #df_found_g = df_found.groupby('URL in DOAJ')
                     #for i, dfg in df_found_g:
                     for df_found_url in df_found_urls:
                         dfg = df_found.loc[df_found['URL in DOAJ']==df_found_url]
-                        #st.write(dfg)
-                        #min_scimago_quartile = dfg['SJR quartile'].min()
-                        #min_scopus_quartile = dfg['Scopus quartile'].min()
-                        #best_scimago = dfg.loc[dfg['SJR quartile']==min_scimago_quartile]
-                        #best_scopus = dfg.loc[dfg['SJR quartile']==min_scopus_quartile]
                         
                         jrn_ti = dfg['Journal title'].tolist()[0]
                         jrn_url = dfg['Journal URL'].tolist()[0]
@@ -152,21 +147,6 @@ with st.form("search_form"):
                                 - [Link to journal's website]({jrn_url})
                                 """ 
                             st.markdown(md_txt)
-
-                            with st.container(border=True):
-                                st.markdown("Scopus' CiteScore Rank 2025")
-                                dfg_rank = dfg.sort_values(by='Scopus quartile', ascending=True)
-                                dfg_rank = dfg_rank.loc[~dfg_rank['Scopus quartile'].isna()]
-                                if dfg_rank.shape[0] > 0:
-                                    st_cols = st.columns(dfg_rank.shape[0])
-
-                                    for i, row in enumerate(dfg_rank[['lv2_asjc_name', 'Scopus quartile']].values.tolist()):
-                                        st_col = st_cols[i]
-                                        with st_col:
-                                            #st.metric(str(row[0]), f'Q{row[1]}')
-                                            st.metric(str(row[0]), f'Q{row[1]}')
-                                else:
-                                    st.write('This journal is not currently listed in the journal ranking.')
                             
                             with st.container(border=True):
                                 st.markdown("SCImago Journal Rank 2025")
@@ -175,7 +155,7 @@ with st.form("search_form"):
                                 if dfg_rank.shape[0] > 0:
                                     st_cols = st.columns(dfg_rank.shape[0])
 
-                                    for i, row in enumerate(dfg_rank[['lv2_asjc_name', 'SJR quartile']].values.tolist()):
+                                    for i, row in enumerate(dfg_rank[['Category', 'SJR quartile']].values.tolist()):
                                         st_col = st_cols[i]
                                         with st_col:
                                             st.metric(str(row[0]), f'Q{row[1]}')
@@ -230,20 +210,6 @@ with st.form("search_form"):
                             - [Link to journal's website]({jrn_url})
                             """ 
                         st.markdown(md_txt)
-
-                        with st.container(border=True):
-                            st.markdown("Scopus' CiteScore Rank 2025")
-                            dfg_rank = df_issn.sort_values(by='Scopus quartile', ascending=True)
-                            dfg_rank = dfg_rank.loc[~dfg_rank['Scopus quartile'].isna()]
-                            if dfg_rank.shape[0] > 0:
-                                st_cols = st.columns(dfg_rank.shape[0])
-
-                                for i, row in enumerate(dfg_rank[['lv2_asjc_name', 'Scopus quartile']].values.tolist()):
-                                    st_col = st_cols[i]
-                                    with st_col:
-                                        st.metric(str(row[0]), f'Q{row[1]}')
-                            else:
-                                st.write('This journal is not currently listed in the journal ranking.')
                         
                         with st.container(border=True):
                             st.markdown("SCImago Journal Rank 2025")
@@ -252,7 +218,7 @@ with st.form("search_form"):
                             if dfg_rank.shape[0] > 0:
                                 st_cols = st.columns(dfg_rank.shape[0])
 
-                                for i, row in enumerate(dfg_rank[['lv2_asjc_name', 'SJR quartile']].values.tolist()):
+                                for i, row in enumerate(dfg_rank[['Category', 'SJR quartile']].values.tolist()):
                                     st_col = st_cols[i]
                                     with st_col:
                                         st.metric(str(row[0]), f'Q{row[1]}')
@@ -265,6 +231,5 @@ md_txt = f"""
 ##### Data Sources
 Directory of Open Access Journals. (n.d.). Journal CSV - DOAJ. Retrieved July 29, 2026, from https://doaj.org/docs/journal-csv     
 SCImago. (n.d.). SJR-SCImago Journal Country & Rank [Portal]. Retrieved July 6, 2026, from https://www.scimagojr.com    
-Scopus. (n.d.). Scopus—Sources. Retrieved July 6, 2026, from https://www.scopus.com/sources.uri?RN_AG_Sourced_400000654
 """
 st.markdown(md_txt)
