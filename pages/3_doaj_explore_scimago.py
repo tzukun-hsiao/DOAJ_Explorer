@@ -86,8 +86,8 @@ if option is not None:
                         df_display2 = df_display2.loc[df_display2['APC']=='No']
 
                     if df_display2.shape[0] > 0:
-                        with st.container(key='hide_toolbar'):
-                            hide_toolbar(container_key='hide_toolbar')
+                        with st.container(key=f'hide_toolbar-{isub}-{iq}'):
+                            hide_toolbar(container_key=f'hide_toolbar-{isub}-{iq}')
                             st.dataframe(
                                 df_display2, 
                                 width='stretch',
