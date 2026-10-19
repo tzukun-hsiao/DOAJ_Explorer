@@ -231,7 +231,7 @@ with st.form("search_form"):
 
 md_txt = f"""
 ##### Data Sources
-Directory of Open Access Journals. (n.d.). Journal CSV - DOAJ. Retrieved August 26, 2026, from https://doaj.org/docs/journal-csv     
+Directory of Open Access Journals. (n.d.). Journal CSV - DOAJ. Retrieved September 30, 2026, from https://doaj.org/docs/journal-csv     
 SCImago. (n.d.). SJR-SCImago Journal Country & Rank [Portal]. Retrieved July 6, 2026, from https://www.scimagojr.com    
 """
 st.markdown(md_txt)
