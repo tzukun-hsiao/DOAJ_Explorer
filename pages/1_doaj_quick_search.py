@@ -23,7 +23,9 @@ def load_data(file_name):
 
     return pd.read_csv(io.BytesIO(response.content), sep='\t')
 
-df = load_data(file_name='doaj_journalcsv_20260726_scimago_ranking.tsv')
+# df = load_data(file_name='doaj_journalcsv_20260726_scimago_ranking.tsv')
+df = load_data(file_name='doaj_journalcsv_20260918_scimago_ranking.tsv')
+
 
 md_txt = """
 ## DOAJ Journal Quick Search 
@@ -39,7 +41,7 @@ Click “View details” to expand the record and see more information.
 ### Want to explore journals by subject area?
 Use the **SCImago Ranking Explorer** from the left sidebar to browse journals by subject area and ranking quartile.
 ### Important Notes
-- Last updated: August 26, 2026
+- Last updated: October 1, 2026
 - **APCs may change over time. Please check the journal’s website for the most up-to-date information.**
 - If you find a journal that interests you and would like to check whether it is indexed in Web of Science, visit the [Web of Science Master Journal List](https://mjl.clarivate.com/home).
 """
