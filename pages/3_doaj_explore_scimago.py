@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 import io
 from github import Github, Auth
+from formatting_tools.styling import hide_toolbar
 
 st.set_page_config(layout="wide")
 
@@ -85,12 +86,14 @@ if option is not None:
                         df_display2 = df_display2.loc[df_display2['APC']=='No']
 
                     if df_display2.shape[0] > 0:
-                        st.dataframe(
-                            df_display2, 
-                            width='stretch',
-                            column_config={
-                                "Journal title": st.column_config.TextColumn("Journal title", width='large')
-                                }
-                            )
+                        with st.container(key='hide_toolbar'):
+                            hide_toolbar(container_key='hide_toolbar')
+                            st.dataframe(
+                                df_display2, 
+                                width='stretch',
+                                column_config={
+                                    "Journal title": st.column_config.TextColumn("Journal title", width='large')
+                                    }
+                                )
                     else:
                         st.write('No journals in this quartile and subject area are free of APCs.')
